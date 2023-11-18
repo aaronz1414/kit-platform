@@ -15,7 +15,7 @@ type Query {
     video(id: ID, slug: String): Video
 }
 
-type Article {
+type Article @key(fields: "id") {
     id: ID!
     title: String!
     description: String
@@ -24,7 +24,7 @@ type Article {
     quizId: String
 }
 
-type Quiz {
+type Quiz @key(fields: "id") {
     id: ID!
     title: String!
     description: String
@@ -36,7 +36,7 @@ type QuizQuestion {
     questionText: String!
 }
 
-type Video {
+type Video @key(fields: "id") {
     id: ID!
     title: String!
     slug: String

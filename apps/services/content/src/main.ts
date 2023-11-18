@@ -24,19 +24,30 @@ const resolvers = {
     Query: {
         articles: () => articles,
         article: (_, { id, slug }) => {
-            return articles.find(
-                (article) => article.id === id || article.slug === slug
-            );
+            return findArticle(id, slug);
         },
         quizzes: () => quizzes,
         quizById: (_, { id }) => {
-            return quizzes.find((quiz) => quiz.id === id);
+            return findQuiz(id);
         },
         videos: () => videos,
         video: (_, { id, slug }) => {
-            return videos.find(
-                (video) => video.id === id || video.slug === slug
-            );
+            return findVideo(id, slug);
+        },
+    },
+    Article: {
+        __resolveReference(rep) {
+            return findArticle(rep.id);
+        },
+    },
+    Quiz: {
+        __resolveReference(rep) {
+            return findQuiz(rep.id);
+        },
+    },
+    Video: {
+        __resolveReference(rep) {
+            return findVideo(rep.id);
         },
     },
 };
@@ -52,3 +63,17 @@ const server = new ApolloServer({
 
     console.log('Content server ready at:', url);
 })();
+
+function findArticle(id?: string, slug?: string) {
+    return articles.find(
+        (article) => article.id === id || article.slug === slug
+    );
+}
+
+function findQuiz(id: string) {
+    return quizzes.find((quiz) => quiz.id === id);
+}
+
+function findVideo(id?: string, slug?: string) {
+    return videos.find((video) => video.id === id || video.slug === slug);
+}

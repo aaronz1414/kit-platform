@@ -8,3 +8,7 @@ subgraphs:
         routing_url: http://localhost:6110
         schema:
             file: ./apps/services/content/src/schema.graphql
+    activity:
+        routing_url: http://localhost:6130
+        schema:
+            file: ./apps/services/activity/src/schema.graphql

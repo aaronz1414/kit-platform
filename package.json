@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "scripts": {
         "build": "nx run-many --target=build --all",
-        "start": "nx run-many --target=serve --projects=client,services-auth,services-content",
+        "start": "nx run-many --target=serve --projects=client,services-auth,services-content,services-activity",
         "start:gateway": "nx run gateway:serve",
         "lint": "nx run-many --target=lint --all",
         "test": "nx run-many --target=test --all --output-style=static --detectOpenHandles",
