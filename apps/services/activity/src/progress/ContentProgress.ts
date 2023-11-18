@@ -48,6 +48,7 @@ export abstract class ContentProgress {
             startedAt: this._startedAt,
             lastProgressAt: this._lastProgressAt,
             completedAt: this._completedAt,
+            type: this.type,
         };
     }
 }

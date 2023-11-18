@@ -41,6 +41,17 @@ const dateTime = new GraphQLScalarType({
 
 const resolvers = {
     DateTime: dateTime,
+    Query: {
+        myHistory: () =>
+            contentProgressRepository.getByUserId('1').map((p) => p.toJson()),
+    },
+    ContentProgress: {
+        __resolveType(contentProgress, ctx) {
+            if (contentProgress.type === 'article') return 'ArticleProgress';
+            else if (contentProgress.type === 'quiz') return 'QuizProgress';
+            return null;
+        },
+    },
     Article: {
         __resolveReference(rep) {
             return {
@@ -72,6 +83,9 @@ const resolvers = {
                 },
             };
         },
+    },
+    QuizProgress: {
+        latestQuestion: (parent) => ({ id: parent.latestQuestionId }),
     },
     Video: {
         __resolveReference(rep) {

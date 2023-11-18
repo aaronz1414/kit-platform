@@ -55,6 +55,10 @@ export class ContentProgressRepository {
         );
     }
 
+    getByUserId(userId: string): ContentProgress[] {
+        return this.allContentProgress.filter((p) => p.userId === userId);
+    }
+
     getAll(): ContentProgress[] {
         return [...this.allContentProgress];
     }
