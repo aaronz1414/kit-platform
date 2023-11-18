@@ -19,6 +19,14 @@ export class ArticleProgress extends ContentProgress {
         return 'article' as const;
     }
 
+    updatePercentage(percentage: number) {
+        this._lastProgressAt = new Date();
+        this._percentage = percentage;
+        if (percentage === 100) {
+            this._completedAt = new Date();
+        }
+    }
+
     toJson() {
         return {
             ...super.toJson(),

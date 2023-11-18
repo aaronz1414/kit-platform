@@ -19,6 +19,11 @@ export class QuizProgress extends ContentProgress {
         return 'quiz' as const;
     }
 
+    updateLatestQuestion(latestQuestionId: string) {
+        this.recordProgress();
+        this._latestQuestionId = latestQuestionId;
+    }
+
     toJson() {
         return {
             ...super.toJson(),

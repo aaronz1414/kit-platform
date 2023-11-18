@@ -59,10 +59,6 @@ export class ContentProgressRepository {
         return this.allContentProgress.filter((p) => p.userId === userId);
     }
 
-    getAll(): ContentProgress[] {
-        return [...this.allContentProgress];
-    }
-
     update(progress: ContentProgress): void {
         const index = this.allContentProgress.findIndex((p) =>
             this.matchesContentProgress(
@@ -72,21 +68,11 @@ export class ContentProgressRepository {
                 p
             )
         );
-        if (!index) {
-            throw new Error('No article found');
+        if (index < 0) {
+            throw new Error('No content progress found');
         }
 
         this.allContentProgress[index] = progress;
-    }
-
-    remove(type: ContentType, userId: string, contentId: string): void {
-        const index = this.allContentProgress.findIndex((p) =>
-            this.matchesContentProgress(type, userId, contentId, p)
-        );
-        if (!index) {
-            throw new Error('No content found');
-        }
-        this.allContentProgress.splice(index, 1);
     }
 
     private matchesContentProgress(
@@ -96,9 +82,9 @@ export class ContentProgressRepository {
         progress: ContentProgress
     ) {
         return (
+            progress.type === type &&
             progress.userId === userId &&
-            progress.contentId === contentId &&
-            type === progress.type
+            progress.contentId === contentId
         );
     }
 }

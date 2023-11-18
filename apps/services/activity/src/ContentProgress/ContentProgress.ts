@@ -11,9 +11,9 @@ export type ContentProgressData = {
 export abstract class ContentProgress {
     private _userId: string;
     private _contentId: string;
-    private _startedAt: Date;
-    private _lastProgressAt: Date;
-    private _completedAt: Date | null;
+    protected _startedAt: Date;
+    protected _lastProgressAt: Date;
+    protected _completedAt: Date | null;
 
     constructor(args: ContentProgressData) {
         this._userId = args.userId;
@@ -40,6 +40,14 @@ export abstract class ContentProgress {
     }
 
     abstract get type(): ContentType;
+
+    protected recordProgress() {
+        this._lastProgressAt = new Date();
+    }
+
+    protected recordCompletion() {
+        this._completedAt = new Date();
+    }
 
     toJson() {
         return {

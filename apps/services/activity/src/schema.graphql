@@ -8,6 +8,15 @@ type Query {
     myHistory: [ContentProgress!]!
 }
 
+type Mutation {
+    recordArticleProgress(
+        input: RecordArticleProgressInput!
+    ): RecordArticleProgressPayload
+    recordQuizProgress(
+        input: RecordQuizProgressInput!
+    ): RecordQuizProgressPayload
+}
+
 scalar DateTime
 
 interface ContentProgress {
@@ -32,6 +41,16 @@ type ArticleProgress implements ContentProgress {
     percentage: Int!
 }
 
+input RecordArticleProgressInput {
+    articleId: ID!
+    percentage: Int!
+}
+
+type RecordArticleProgressPayload {
+    progress: ArticleProgress
+    # TODO: User errors could be added here
+}
+
 ########
 # QUIZ #
 ########
@@ -50,6 +69,16 @@ type QuizProgress implements ContentProgress {
     lastProgressAt: DateTime!
     completedAt: DateTime
     latestQuestion: QuizQuestion!
+}
+
+input RecordQuizProgressInput {
+    quizId: ID!
+    latestQuestionId: ID!
+}
+
+type RecordQuizProgressPayload {
+    progress: QuizProgress
+    # TODO: Could add user errors here
 }
 
 #########

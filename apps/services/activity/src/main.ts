@@ -5,7 +5,13 @@ import * as fs from 'fs';
 import gql from 'graphql-tag';
 import { GraphQLScalarType, Kind } from 'graphql';
 import * as path from 'path';
-import { ContentProgressRepository, isQuizProgress } from './progress';
+import {
+    ContentProgressRepository,
+    initializeArticleProgress,
+    initializeQuizProgress,
+    isArticleProgress,
+    isQuizProgress,
+} from './ContentProgress';
 
 // Schema
 // ------
@@ -44,6 +50,68 @@ const resolvers = {
     Query: {
         myHistory: () =>
             contentProgressRepository.getByUserId('1').map((p) => p.toJson()),
+    },
+    Mutation: {
+        recordArticleProgress(
+            _,
+            {
+                input: { articleId, percentage },
+            }: { input: { articleId: string; percentage: number } }
+        ) {
+            let progress = contentProgressRepository.getOne(
+                'article',
+                '1',
+                articleId
+            );
+
+            if (!progress) {
+                progress = initializeArticleProgress({
+                    articleId,
+                    userId: '1',
+                    percentage,
+                });
+                contentProgressRepository.add(progress);
+            } else if (!isArticleProgress(progress)) {
+                return null;
+            } else {
+                progress.updatePercentage(percentage);
+                contentProgressRepository.update(progress);
+            }
+
+            return {
+                progress: progress.toJson(),
+            };
+        },
+        recordQuizProgress(
+            _,
+            {
+                input: { quizId, latestQuestionId },
+            }: { input: { quizId: string; latestQuestionId: string } }
+        ) {
+            let progress = contentProgressRepository.getOne(
+                'quiz',
+                '1',
+                quizId
+            );
+
+            if (!progress) {
+                progress = initializeQuizProgress({
+                    quizId,
+                    userId: '1',
+                    latestQuestionId,
+                });
+                contentProgressRepository.add(progress);
+            } else if (!isQuizProgress(progress)) {
+                return null;
+            } else {
+                progress.updateLatestQuestion(latestQuestionId);
+                contentProgressRepository.update(progress);
+            }
+
+            return {
+                progress: progress.toJson(),
+            };
+        },
     },
     ContentProgress: {
         __resolveType(contentProgress, ctx) {
