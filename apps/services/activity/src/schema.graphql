@@ -4,13 +4,24 @@ extend schema
         import: ["@key", "@interfaceObject"]
     )
 
-type Query {
-    testQuery: Article!
-}
+scalar DateTime
 
 type Article @key(fields: "id") {
     id: ID!
-    testField: String!
+    myProgress: ArticleProgress
+}
+
+interface ContentProgress {
+    startedAt: DateTime!
+    lastProgressAt: DateTime!
+    completedAt: DateTime
+}
+
+type ArticleProgress implements ContentProgress {
+    startedAt: DateTime!
+    lastProgressAt: DateTime!
+    completedAt: DateTime!
+    percentage: Int!
 }
 
 type Quiz @key(fields: "id") {
