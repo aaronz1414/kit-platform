@@ -31,7 +31,7 @@ type Quiz @key(fields: "id") {
     questions: [QuizQuestion!]!
 }
 
-type QuizQuestion {
+type QuizQuestion @key(fields: "id") {
     id: ID!
     questionText: String!
 }

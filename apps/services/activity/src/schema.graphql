@@ -6,15 +6,19 @@ extend schema
 
 scalar DateTime
 
-type Article @key(fields: "id") {
-    id: ID!
-    myProgress: ArticleProgress
-}
-
 interface ContentProgress {
     startedAt: DateTime!
     lastProgressAt: DateTime!
     completedAt: DateTime
+}
+
+###########
+# ARTICLE #
+###########
+
+type Article @key(fields: "id") {
+    id: ID!
+    myProgress: ArticleProgress
 }
 
 type ArticleProgress implements ContentProgress {
@@ -24,10 +28,29 @@ type ArticleProgress implements ContentProgress {
     percentage: Int!
 }
 
+########
+# QUIZ #
+########
+
 type Quiz @key(fields: "id") {
     id: ID!
-    testField: String!
+    myProgress: QuizProgress
 }
+
+type QuizQuestion @key(fields: "id", resolvable: false) {
+    id: ID!
+}
+
+type QuizProgress implements ContentProgress {
+    startedAt: DateTime!
+    lastProgressAt: DateTime!
+    completedAt: DateTime
+    latestQuestion: QuizQuestion!
+}
+
+#########
+# VIDEO #
+#########
 
 type Video @key(fields: "id") {
     id: ID!

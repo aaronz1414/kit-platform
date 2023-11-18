@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import gql from 'graphql-tag';
 import { GraphQLScalarType, Kind } from 'graphql';
 import * as path from 'path';
-import { ArticleProgressRepository } from './progress';
+import { ContentProgressRepository, isQuizProgress } from './progress';
 
 // Schema
 // ------
@@ -18,7 +18,7 @@ const typeDefs = gql(
     )
 );
 
-const articleProgressRepository = new ArticleProgressRepository();
+const contentProgressRepository = new ContentProgressRepository();
 
 // Resolvers
 // ---------
@@ -45,15 +45,31 @@ const resolvers = {
         __resolveReference(rep) {
             return {
                 id: rep.id,
-                myProgress: articleProgressRepository.getOne('1', rep.id),
+                myProgress: contentProgressRepository
+                    .getOne('article', '1', rep.id)
+                    .toJson(),
             };
         },
     },
     Quiz: {
         __resolveReference(rep) {
+            const progress = contentProgressRepository.getOne(
+                'quiz',
+                '1',
+                rep.id
+            );
+            if (!isQuizProgress(progress)) {
+                return null;
+            }
+
             return {
                 id: rep.id,
-                testField: 'I am a quiz',
+                myProgress: {
+                    ...progress.toJson(),
+                    latestQuestion: {
+                        id: progress.latestQuestionId,
+                    },
+                },
             };
         },
     },

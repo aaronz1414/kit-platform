@@ -45,6 +45,13 @@ const resolvers = {
             return findQuiz(rep.id);
         },
     },
+    QuizQuestion: {
+        __resolveReference(rep) {
+            return quizzes
+                .flatMap((q) => q.questions)
+                .find((q) => q.id === rep.id);
+        },
+    },
     Video: {
         __resolveReference(rep) {
             return findVideo(rep.id);
