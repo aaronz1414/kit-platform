@@ -20,7 +20,7 @@ interface ContentProgress {
 type ArticleProgress implements ContentProgress {
     startedAt: DateTime!
     lastProgressAt: DateTime!
-    completedAt: DateTime!
+    completedAt: DateTime
     percentage: Int!
 }
 

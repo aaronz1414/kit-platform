@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import gql from 'graphql-tag';
 import { GraphQLScalarType, Kind } from 'graphql';
 import * as path from 'path';
+import { ArticleProgressRepository } from './progress';
 
 // Schema
 // ------
@@ -16,6 +17,8 @@ const typeDefs = gql(
         }
     )
 );
+
+const articleProgressRepository = new ArticleProgressRepository();
 
 // Resolvers
 // ---------
@@ -42,12 +45,7 @@ const resolvers = {
         __resolveReference(rep) {
             return {
                 id: rep.id,
-                myProgress: {
-                    startedAt: new Date(),
-                    lastProgressAt: new Date(),
-                    completedAt: new Date(),
-                    percentage: 50,
-                },
+                myProgress: articleProgressRepository.getOne('1', rep.id),
             };
         },
     },
