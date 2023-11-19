@@ -138,15 +138,18 @@ const resolvers = {
     },
     Article: {
         async __resolveReference(rep, { user }) {
+            const progress = await contentProgressRepository.getOne(
+                'article',
+                user.id,
+                rep.id
+            );
+            if (!progress || !isArticleProgress(progress)) {
+                return null;
+            }
+
             return {
                 id: rep.id,
-                myProgress: (
-                    await contentProgressRepository.getOne(
-                        'article',
-                        user.id,
-                        rep.id
-                    )
-                ).toJson(),
+                myProgress: progress.toJson(),
             };
         },
     },
@@ -157,7 +160,7 @@ const resolvers = {
                 user.id,
                 rep.id
             );
-            if (!isQuizProgress(progress)) {
+            if (!progress || !isQuizProgress(progress)) {
                 return null;
             }
 
