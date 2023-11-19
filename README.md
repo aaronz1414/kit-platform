@@ -1,3 +1,33 @@
+# Aaron's Notes
+
+## Running the project
+
+A docker-compose file has been added so that you can spin up all the
+dependencies, including a postgres container and a migration job, with
+`docker-compose up`.
+
+## Examples of things I'd do with more time
+
+-   Implement the remaining resolvers (I've added what I was imagining the
+    remainder of the API to be as comments in the schema)
+-   Add dataloader with a batch query for fetching the fields on the entity
+    resolvers/type resolvers (so that if all articles were loaded along with
+    their progress for example, that would only result in one batch query rather
+    than many individual queries).
+-   Add types to the resolvers with graphql-codegen.
+-   Grab a value for the user from the headers (potentially authenticating
+    against the login lib utils function, or in a real application the user
+    profile might be resolved and forwarded along as a header from an upstream
+    service) rather than hard-coding it into the context function.
+-   Add pagination to myHistory
+
+## Other Notes
+
+-   The models/repository and inheritance structure of ContentProgress may be a
+    little heavy for an application of this size, but I wanted to give an
+    example of how I'd think about modularizing business logic and data access
+    to manage complexity as the features of the application grow over time.
+
 # Kit Platform (Take-Root Project)
 
 Thank you for taking the time to interview with the Platform Squad at
@@ -46,9 +76,13 @@ the Web and share a unified store of user data and progress.
 
 For this exercise, you will implement one or more GraphQL services within an
 Apollo Federation supergraph which provide an API for tracking users' activity
-and progress on their corporate training. 
+and progress on their corporate training.
 
-For the sake of simplicity, assume that relationships between training material (audio, video, interactive lessons, etc.) are flat - meaning you don't need to deal with resources that contain other resources. A user has a relationship with a resource. Your system tracks the progress of that relationship, including it's progress, completion state, and whether the user has bookmarked the resource.
+For the sake of simplicity, assume that relationships between training material
+(audio, video, interactive lessons, etc.) are flat - meaning you don't need to
+deal with resources that contain other resources. A user has a relationship with
+a resource. Your system tracks the progress of that relationship, including it's
+progress, completion state, and whether the user has bookmarked the resource.
 
 This repo represents scaffolding into which your new services should be written
 (more details in the sections below).
@@ -82,8 +116,9 @@ needing to create some new API methods for the library to expand the user access
 functionality.
 
 You can run and experiment with the supergraph by installing the dependencies
-(`npm i`; Node.js 20 is recommended) and executing the following commands in
-two separate terminal windows (the Gateway is a bit of a prima dona and has to run separately):
+(`npm i`; Node.js 20 is recommended) and executing the following commands in two
+separate terminal windows (the Gateway is a bit of a prima dona and has to run
+separately):
 
 -   `cp .env.example .env` (**Don't skip this step!**)
 -   `npm run start`
@@ -94,7 +129,8 @@ Then navigate to http://localhost:6050 to query your supergraph.
 Finding a better way to serve everything with a single command is left as an
 exercise.
 
-> **Heads up**: When you add  a new service, you will need to update  the `--projects` flag in the npm start command to include your new service.  
+> **Heads up**: When you add a new service, you will need to update the
+> `--projects` flag in the npm start command to include your new service.
 
 ## Task
 
@@ -132,4 +168,5 @@ Docker Compose stacks or other locally emulated cloud resources.
 -   You may notice that this monorepo is on an older version of Nx. Upgrading
     the dependencies is allowed and even encouraged! Just be prepared to explain
     the changes.
-- If you notice caching issues you can run `npx nx reset` to clear the Nx cache.
+-   If you notice caching issues you can run `npx nx reset` to clear the Nx
+    cache.

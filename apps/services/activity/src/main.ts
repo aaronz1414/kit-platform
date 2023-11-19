@@ -179,7 +179,7 @@ const resolvers = {
         __resolveReference(rep) {
             return {
                 id: rep.id,
-                testField: 'I am a video',
+                exampleField: 'I am a video',
             };
         },
     },

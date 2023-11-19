@@ -6,6 +6,7 @@ extend schema
 
 type Query {
     myHistory: [ContentProgress!]!
+    # myBookmarks: [Bookmark!]!
 }
 
 type Mutation {
@@ -15,6 +16,21 @@ type Mutation {
     recordQuizProgress(
         input: RecordQuizProgressInput!
     ): RecordQuizProgressPayload
+    # recordQuizProgress(
+    #     input: RecordQuizProgressInput!
+    # ): RecordQuizProgressPayload
+
+    # NOTE: While articles can easily be determined completed within the
+    # activity service, quizzes and videos would either need to have
+    # additional information (number of questions and duration, respectively)
+    # stored in the activity service to determine whether they are completed.
+    # It seems better to me to not have that dependency, and simply add a
+    # mutation for marking those content types completed instead.
+    #
+    # markCompleted(input: MarkCompletedInput!): MarkCompletedPayload
+
+    # addBookmark(input: AddBookmarkInput!): AddBookmarkPayload
+    # removeBookmark(input: RemoveBookmarkInput!): RemoveBookmarkPayload
 }
 
 scalar DateTime
@@ -25,6 +41,26 @@ interface ContentProgress {
     completedAt: DateTime
 }
 
+# enum ContentType {
+#   ARTICLE
+#   QUIZ
+#   VIDEO
+# }
+
+# input MarkCompletedInput {
+#    content: [MarkCompletedContentInput!]!
+# }
+#
+# input MarkCompletedContentInput {
+#     contentId: ID!
+#     contentType: ContentType!
+# }
+#
+# type MarkCompletedPayload {
+#     completed: [ContentProgress!]!
+#     # TODO: User errors could be added here
+# }
+
 ###########
 # ARTICLE #
 ###########
@@ -32,6 +68,7 @@ interface ContentProgress {
 type Article @key(fields: "id") {
     id: ID!
     myProgress: ArticleProgress
+    # myBookmark: Bookmark
 }
 
 type ArticleProgress implements ContentProgress {
@@ -58,6 +95,7 @@ type RecordArticleProgressPayload {
 type Quiz @key(fields: "id") {
     id: ID!
     myProgress: QuizProgress
+    # myBookmark: Bookmark
 }
 
 type QuizQuestion @key(fields: "id", resolvable: false) {
@@ -87,5 +125,63 @@ type RecordQuizProgressPayload {
 
 type Video @key(fields: "id") {
     id: ID!
-    testField: String!
+    exampleField: String!
+    # myProgress: VideoProgress
+    # myBookmark: Bookmark
 }
+
+# type VideoProgress implements ContentProgress {
+#     startedAt: DateTime!
+#     lastProgressAt: DateTime!
+#     completedAt: DateTime
+#     time: Int!
+# }
+
+# input RecordVideoProgressInput {
+#     videoId: ID!
+#     time: ID!
+# }
+#
+# type RecordVideoProgressPayload {
+#     progress: VideoProgress
+#     # TODO: Could add user errors here
+# }
+
+#############
+# BOOKMARKS #
+#############
+
+# union Content = Article | Quiz | Video
+
+# type Bookmark {
+#     bookmarkedAt: DateTime!
+#     content: Content!
+# }
+
+# input AddBookmarkInput {
+#    content: [AddBookmarkContentInput!]!
+# }
+#
+# input AddBookmarkContentInput {
+#     contentId: ID!
+#     contentType: ContentType!
+# }
+#
+# type AddBookmarkPayload {
+#     bookmarks: [Bookmark!]!
+#     # TODO: User errors could be added here
+# }
+
+# input RemoveBookmarkInput {
+#    content: [RemoveBookmarkContentInput!]!
+# }
+#
+# input RemoveBookmarkContentInput {
+#     contentId: ID!
+#     contentType: ContentType!
+# }
+#
+# type RemoveBookmarkPayload {
+#     success: Boolean!
+#     # TODO: User errors could be added here
+# }
