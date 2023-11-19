@@ -1,6 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { buildSubgraphSchema } from '@apollo/subgraph';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { login } from '@kit-platform/user-access';
 import * as fs from 'fs';
 import gql from 'graphql-tag';
 import { GraphQLScalarType, Kind } from 'graphql';
@@ -48,8 +49,10 @@ const dateTime = new GraphQLScalarType({
 const resolvers = {
     DateTime: dateTime,
     Query: {
-        myHistory: async () => {
-            const history = await contentProgressRepository.getByUserId('1');
+        myHistory: async (parent, args, { user }) => {
+            const history = await contentProgressRepository.getByUserId(
+                user.id
+            );
             return history
                 .sort(
                     (a, b) =>
@@ -63,7 +66,8 @@ const resolvers = {
             _,
             {
                 input: { articleId, percentage },
-            }: { input: { articleId: string; percentage: number } }
+            }: { input: { articleId: string; percentage: number } },
+            { user }
         ) {
             let progress = await contentProgressRepository.getOne(
                 'article',
@@ -74,7 +78,7 @@ const resolvers = {
             if (!progress) {
                 const newContentProgress = initializeArticleProgress({
                     articleId,
-                    userId: '1',
+                    userId: user.id,
                     percentage,
                 });
                 progress = await contentProgressRepository.add(
@@ -95,18 +99,19 @@ const resolvers = {
             _,
             {
                 input: { quizId, latestQuestionId },
-            }: { input: { quizId: string; latestQuestionId: string } }
+            }: { input: { quizId: string; latestQuestionId: string } },
+            { user }
         ) {
             let progress = await contentProgressRepository.getOne(
                 'quiz',
-                '1',
+                user.id,
                 quizId
             );
 
             if (!progress) {
                 const newContentProgress = initializeQuizProgress({
                     quizId,
-                    userId: '1',
+                    userId: user.id,
                     latestQuestionId,
                 });
                 progress = await contentProgressRepository.add(
@@ -125,20 +130,20 @@ const resolvers = {
         },
     },
     ContentProgress: {
-        __resolveType(contentProgress, ctx) {
+        __resolveType(contentProgress) {
             if (contentProgress.type === 'article') return 'ArticleProgress';
             else if (contentProgress.type === 'quiz') return 'QuizProgress';
             return null;
         },
     },
     Article: {
-        async __resolveReference(rep) {
+        async __resolveReference(rep, { user }) {
             return {
                 id: rep.id,
                 myProgress: (
                     await contentProgressRepository.getOne(
                         'article',
-                        '1',
+                        user.id,
                         rep.id
                     )
                 ).toJson(),
@@ -146,10 +151,10 @@ const resolvers = {
         },
     },
     Quiz: {
-        async __resolveReference(rep) {
+        async __resolveReference(rep, { user }) {
             const progress = await contentProgressRepository.getOne(
                 'quiz',
-                '1',
+                user.id,
                 rep.id
             );
             if (!isQuizProgress(progress)) {
@@ -187,6 +192,13 @@ const server = new ApolloServer({
 (async () => {
     const { url } = await startStandaloneServer(server, {
         listen: { port: parseInt(process.env.ACTIVITY_SERVICE_PORT) || 6130 },
+        context: async ({ req }) => {
+            // TODO: Parse user id from headers - for example, a user jwt
+            // attached by a gateway that uses a session id from a cookie
+            // to grab the user profile
+            const user = { id: 1 };
+            return { user };
+        },
     });
 
     console.log('Activity server ready at:', url);
