@@ -9,7 +9,14 @@ dependencies, including a postgres container and a migration job, with
 ## Examples of things I'd do with more time
 
 -   Implement the remaining resolvers (I've added what I was imagining the
-    remainder of the API to be as comments in the schema)
+    remainder of the API to be as comments in the schema).
+-   Move the database utils over to a prop module in libs so that the relative
+    imports aren't needed in ContentProgressRepository.
+-   Add a table constraint to content_progress to prevent invalid states (for
+    example, a row of type 'article' should have a null value for
+    latest_question_id).
+-   Add transactions (and potentially retry logic for aborted transactions) in
+    the mutation resolvers.
 -   Add dataloader with a batch query for fetching the fields on the entity
     resolvers/type resolvers (so that if all articles were loaded along with
     their progress for example, that would only result in one batch query rather
@@ -19,7 +26,7 @@ dependencies, including a postgres container and a migration job, with
     against the login lib utils function, or in a real application the user
     profile might be resolved and forwarded along as a header from an upstream
     service) rather than hard-coding it into the context function.
--   Add pagination to myHistory
+-   Add pagination to myHistory.
 
 ## Other Notes
 
