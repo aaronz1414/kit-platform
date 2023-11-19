@@ -20,10 +20,10 @@ export class ArticleProgress extends ContentProgress {
     }
 
     updatePercentage(percentage: number) {
-        this._lastProgressAt = new Date();
+        super.recordProgress();
         this._percentage = percentage;
         if (percentage === 100) {
-            this._completedAt = new Date();
+            super.recordCompletion();
         }
     }
 

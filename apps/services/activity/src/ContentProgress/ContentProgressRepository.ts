@@ -1,90 +1,81 @@
 import { ArticleProgress } from './ArticleProgress';
 import { ContentProgress, ContentType } from './ContentProgress';
 import { QuizProgress } from './QuizProgress';
+import { db } from '../../../../../libs/db';
+import {
+    ContentProgressRow,
+    content_progress,
+} from '../../../../../libs/databaseSchema';
+import { and, eq } from 'drizzle-orm';
 
 export class ContentProgressRepository {
-    private allContentProgress: ContentProgress[];
-
-    constructor() {
-        this.allContentProgress = [
-            new QuizProgress({
-                userId: '1',
-                contentId: '1',
-                startedAt: new Date(),
-                lastProgressAt: new Date(),
-                latestQuestionId: '2',
-            }),
-            new ArticleProgress({
-                userId: '1',
-                contentId: '100',
-                startedAt: new Date(),
-                lastProgressAt: new Date(),
-                percentage: 25,
-            }),
-            new ArticleProgress({
-                userId: '1',
-                contentId: '101',
-                startedAt: new Date(),
-                lastProgressAt: new Date(),
-                percentage: 75,
-            }),
-            new ArticleProgress({
-                userId: '1',
-                contentId: '102',
-                startedAt: new Date(),
-                lastProgressAt: new Date(),
-                percentage: 100,
-                completedAt: new Date(),
-            }),
-        ];
+    async add(progress: ContentProgress): Promise<ContentProgress> {
+        await db.insert(content_progress).values(progress.toJson()).returning();
+        return progress;
     }
 
-    add(progress: ContentProgress): void {
-        this.allContentProgress.push(progress);
-    }
-
-    getOne(
+    async getOne(
         type: ContentType,
         userId: string,
         contentId: string
-    ): ContentProgress | null {
-        return (
-            this.allContentProgress.find((p) =>
-                this.matchesContentProgress(type, userId, contentId, p)
-            ) ?? null
-        );
+    ): Promise<ContentProgress | null> {
+        const queryResult = await db
+            .select()
+            .from(content_progress)
+            .where(this.getPrimaryKeyFilter(type, userId, contentId));
+        const row = queryResult[0];
+
+        return row ? this.createContentProgress(row) : null;
     }
 
-    getByUserId(userId: string): ContentProgress[] {
-        return this.allContentProgress.filter((p) => p.userId === userId);
+    async getByUserId(userId: string): Promise<ContentProgress[]> {
+        const rows = await db
+            .select()
+            .from(content_progress)
+            .where(eq(content_progress.userId, userId));
+        return rows.map((r) => this.createContentProgress(r));
     }
 
-    update(progress: ContentProgress): void {
-        const index = this.allContentProgress.findIndex((p) =>
-            this.matchesContentProgress(
-                progress.type,
-                progress.userId,
-                progress.contentId,
-                p
+    async update(progress: ContentProgress): Promise<ContentProgress> {
+        const queryResult = await db
+            .update(content_progress)
+            .set(progress.toJson())
+            .where(
+                this.getPrimaryKeyFilter(
+                    progress.type,
+                    progress.userId,
+                    progress.contentId
+                )
             )
-        );
-        if (index < 0) {
-            throw new Error('No content progress found');
+            .returning();
+        const row = queryResult[0];
+        if (!row) {
+            throw new Error('Update failed');
         }
 
-        this.allContentProgress[index] = progress;
+        return this.createContentProgress(row);
     }
 
-    private matchesContentProgress(
+    private createContentProgress(row: ContentProgressRow) {
+        switch (row.type) {
+            case 'article':
+                return new ArticleProgress(row);
+            case 'quiz':
+                return new QuizProgress(row);
+            default:
+                throw new Error('Invalid Row');
+        }
+    }
+
+    private getPrimaryKeyFilter(
         type: ContentType,
         userId: string,
-        contentId: string,
-        progress: ContentProgress
+        contentId: string
     ) {
-        return (
-            progress.type === type &&
-            progress.userId === userId &&
-            progress.contentId === contentId
+        return and(
+            eq(content_progress.userId, userId),
+            eq(content_progress.type, type),
+            eq(content_progress.contentId, contentId)
         );
     }
 }

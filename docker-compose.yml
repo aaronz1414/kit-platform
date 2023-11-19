@@ -1,0 +1,100 @@
+version: '3'
+services:
+    postgres:
+        image: postgres:latest
+        environment:
+            POSTGRES_DB: user_activity
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+        ports:
+            - '5432:5432'
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+
+    migration:
+        image: app
+        build: .
+        depends_on:
+            - postgres
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_NAME: user_activity
+            DB_USER: postgres
+            DB_PASSWORD: password
+        command: ['npx', 'tsx', 'libs/migrate.ts']
+        volumes:
+            - ./libs:/app/libs
+            - ./migrations:/app/migrations
+
+    content:
+        image: app
+        build: .
+        depends_on:
+            - migration
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_NAME: user_activity
+            DB_USER: postgres
+            DB_PASSWORD: password
+        command: ['npx', 'nx', 'run', 'services-content:serve']
+        volumes:
+            - ./apps:/app/apps
+            - ./libs:/app/libs
+
+    auth:
+        image: app
+        build: .
+        depends_on:
+            - migration
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_NAME: user_activity
+            DB_USER: postgres
+            DB_PASSWORD: password
+        command: ['npx', 'nx', 'run', 'services-auth:serve']
+        volumes:
+            - ./apps:/app/apps
+            - ./libs:/app/libs
+
+    activity:
+        image: app
+        build: .
+        depends_on:
+            - migration
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_NAME: user_activity
+            DB_USER: postgres
+            DB_PASSWORD: password
+        command: ['npx', 'nx', 'run', 'services-activity:serve']
+        volumes:
+            - ./apps:/app/apps
+            - ./libs:/app/libs
+
+    npm-gateway:
+        image: app
+        build: .
+        depends_on:
+            - auth
+            - content
+            - activity
+        ports:
+            - '6050:6050'
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_NAME: user_activity
+            DB_USER: postgres
+            DB_PASSWORD: password
+            APOLLO_ELV2_LICENSE: accept
+        command: ['npx', 'nx', 'run', 'gateway:serve']
+        volumes:
+            - ./apps:/app/apps
+            - ./supergraph-config.yml:/app/supergraph-config.yml
+
+volumes:
+    postgres-data:

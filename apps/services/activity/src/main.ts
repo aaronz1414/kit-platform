@@ -48,64 +48,70 @@ const dateTime = new GraphQLScalarType({
 const resolvers = {
     DateTime: dateTime,
     Query: {
-        myHistory: () =>
-            contentProgressRepository.getByUserId('1').map((p) => p.toJson()),
+        myHistory: async () =>
+            (await contentProgressRepository.getByUserId('1')).map((p) =>
+                p.toJson()
+            ),
     },
     Mutation: {
-        recordArticleProgress(
+        async recordArticleProgress(
             _,
             {
                 input: { articleId, percentage },
             }: { input: { articleId: string; percentage: number } }
         ) {
-            let progress = contentProgressRepository.getOne(
+            let progress = await contentProgressRepository.getOne(
                 'article',
                 '1',
                 articleId
             );
 
             if (!progress) {
-                progress = initializeArticleProgress({
+                const newContentProgress = initializeArticleProgress({
                     articleId,
                     userId: '1',
                     percentage,
                 });
-                contentProgressRepository.add(progress);
+                progress = await contentProgressRepository.add(
+                    newContentProgress
+                );
             } else if (!isArticleProgress(progress)) {
                 return null;
             } else {
                 progress.updatePercentage(percentage);
-                contentProgressRepository.update(progress);
+                progress = await contentProgressRepository.update(progress);
             }
 
             return {
                 progress: progress.toJson(),
             };
         },
-        recordQuizProgress(
+        async recordQuizProgress(
             _,
             {
                 input: { quizId, latestQuestionId },
             }: { input: { quizId: string; latestQuestionId: string } }
         ) {
-            let progress = contentProgressRepository.getOne(
+            let progress = await contentProgressRepository.getOne(
                 'quiz',
                 '1',
                 quizId
             );
 
             if (!progress) {
-                progress = initializeQuizProgress({
+                const newContentProgress = initializeQuizProgress({
                     quizId,
                     userId: '1',
                     latestQuestionId,
                 });
-                contentProgressRepository.add(progress);
+                progress = await contentProgressRepository.add(
+                    newContentProgress
+                );
             } else if (!isQuizProgress(progress)) {
                 return null;
             } else {
                 progress.updateLatestQuestion(latestQuestionId);
-                contentProgressRepository.update(progress);
+                progress = await contentProgressRepository.update(progress);
             }
 
             return {
@@ -121,18 +127,22 @@ const resolvers = {
         },
     },
     Article: {
-        __resolveReference(rep) {
+        async __resolveReference(rep) {
             return {
                 id: rep.id,
-                myProgress: contentProgressRepository
-                    .getOne('article', '1', rep.id)
-                    .toJson(),
+                myProgress: (
+                    await contentProgressRepository.getOne(
+                        'article',
+                        '1',
+                        rep.id
+                    )
+                ).toJson(),
             };
         },
     },
     Quiz: {
-        __resolveReference(rep) {
-            const progress = contentProgressRepository.getOne(
+        async __resolveReference(rep) {
+            const progress = await contentProgressRepository.getOne(
                 'quiz',
                 '1',
                 rep.id

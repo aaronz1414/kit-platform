@@ -1,0 +1,14 @@
+{
+    "version": "5",
+    "dialect": "pg",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "5",
+            "when": 1700356733209,
+            "tag": "0000_create_content_progress_table",
+            "breakpoints": true
+        }
+    ]
+}
+
