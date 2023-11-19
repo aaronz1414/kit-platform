@@ -48,10 +48,15 @@ const dateTime = new GraphQLScalarType({
 const resolvers = {
     DateTime: dateTime,
     Query: {
-        myHistory: async () =>
-            (await contentProgressRepository.getByUserId('1')).map((p) =>
-                p.toJson()
-            ),
+        myHistory: async () => {
+            const history = await contentProgressRepository.getByUserId('1');
+            return history
+                .sort(
+                    (a, b) =>
+                        b.lastProgressAt.getTime() - a.lastProgressAt.getTime()
+                )
+                .map((p) => p.toJson());
+        },
     },
     Mutation: {
         async recordArticleProgress(
